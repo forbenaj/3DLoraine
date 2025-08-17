@@ -1,0 +1,169 @@
+import { textureLoader } from './utils.js';
+
+export class World {
+    constructor(scene) {
+        this.objects = [];
+        this.meshes = [];
+        this.gravity = 0.005
+        this.scene = scene;
+    }
+
+    addObject(object) {
+        this.objects.push(object);
+    }
+
+    removeObject(object) {
+        this.objects.splice(this.objects.indexOf(object), 1);
+    }
+    createScene(worldData) {
+        const boxes = worldData.boxes;
+        for (let i = 0; i < boxes.length; i++) {
+            const boxData = boxes[i];
+            let [group, box] = this.createBox(boxData.pos, boxData.size, boxData.materialInfo);
+            this.scene.add(group)
+            this.scene.add(box)
+        }
+        if (worldData.skybox) {
+            this.createSkybox(worldData.skybox);
+        }
+    }
+    oldcreateBox(pos, size, materialInfo) {
+        const geometry = new THREE.BoxGeometry(size.x, size.y, size.z);
+        let material = this.createMaterial(materialInfo);
+        const box = new THREE.Mesh(geometry, material);
+        box.position.x = pos.x+size.x/2;
+        box.position.y = pos.y+size.y/2;
+        box.position.z = pos.z+size.z/2;
+        this.addObject(box);
+        return box;
+    }
+
+    createBox(pos, size, materialInfo) {
+        function createEdges(geometry) {
+            const edgesGeometry = new THREE.EdgesGeometry(geometry);
+            const edgesMaterial = new THREE.LineBasicMaterial({ color: 0x000000, linewidth: 5 });
+            const edges = new THREE.LineSegments(edgesGeometry, edgesMaterial);
+            return edges;
+        }
+        const geometry = new THREE.BoxGeometry(size.x, size.y, size.z);
+
+        let materials = this.createMaterial(materialInfo, size);
+    
+        const box = new THREE.Mesh(geometry, materials);
+        
+        box.position.x = pos.x + size.x/2;
+        box.position.y = pos.y + size.y/2;
+        box.position.z = pos.z + size.z/2;
+
+        const edges1 = createEdges(geometry);
+        const edges2 = createEdges(geometry.clone().translate(-0.01, 0.01, 0.01));
+        const edges3 = createEdges(geometry.clone().translate(0.01, 0.01, -0.01));
+        
+        edges1.position.copy(box.position);
+        edges2.position.copy(box.position);
+        edges3.position.copy(box.position);
+        
+        this.addObject(box);
+        
+        const group = new THREE.Group();
+        group.add(box);
+        group.add(edges1);
+        group.add(edges2);
+        group.add(edges3);
+        return [group, box];
+    }
+    createMaterial(materialInfo, size) {
+        let materials = [];
+        let faceSizes = [
+            new THREE.Vector2(size.z, size.y), // right
+            new THREE.Vector2(size.z, size.y), // left
+            new THREE.Vector2(size.x, size.z), // top
+            new THREE.Vector2(size.x, size.z), // bottom
+            new THREE.Vector2(size.x, size.y), // front
+            new THREE.Vector2(size.x, size.y) // back
+        ];
+        for (let i = 0; i < 6; i++) {
+            let imgNum = materialInfo.length === 1 ? 0 : i;
+            let material = null;
+        
+            if (materialInfo[imgNum].type === 'image') {
+                const texture = textureLoader.load(materialInfo[imgNum].texture);
+
+                const faceSize = faceSizes[i];
+
+                if (materialInfo[imgNum].size !== undefined) {
+                    texture.wrapS = THREE.RepeatWrapping;
+                    texture.wrapT = THREE.RepeatWrapping;
+                    let repeatX = faceSize.x / materialInfo[imgNum].size.x;
+                    let repeatY = faceSize.y / materialInfo[imgNum].size.y;
+                    texture.repeat.set(repeatX, repeatY);
+                }
+        
+                if (materialInfo[imgNum].flipY !== undefined) {
+                    texture.flipY = materialInfo[imgNum].texture.flipY;
+                }
+                if (materialInfo[imgNum].wrap !== undefined) {
+                    texture.wrapS = materialInfo[imgNum].texture.wrap;
+                    texture.wrapT = materialInfo[imgNum].texture.wrap;
+                }
+                if (materialInfo[imgNum].repeat !== undefined) {
+                    texture.wrapS = THREE.RepeatWrapping;
+                    texture.wrapT = THREE.RepeatWrapping;
+                    let size = faceSizes[imgNum];
+                    let repeatX = size.x / 100;
+                    let repeatY = size.y / 100;
+                    texture.repeat.set(repeatX, repeatY);
+                }
+                if (materialInfo[imgNum].offset !== undefined) {
+                    texture.offset.set(materialInfo[imgNum].offset.x, materialInfo[imgNum].offset.y);
+                }
+                if (materialInfo[imgNum].rotation !== undefined) {
+                    texture.rotation = materialInfo[imgNum].rotation;
+                }
+                if (materialInfo[imgNum].position !== undefined) {
+                    texture.center.set(materialInfo[imgNum].position.x, materialInfo[imgNum].position.y);
+                }
+                if (materialInfo[imgNum].scale !== undefined) {
+                    texture.repeat.set(materialInfo[imgNum].scale.x, materialInfo[imgNum].scale.y);
+                }
+                
+        
+                material = new THREE.MeshBasicMaterial({ map: texture });
+        
+                if (materialInfo[imgNum].texture.flipY) {
+                    material.side = THREE.DoubleSide;
+                }
+        
+            }
+            else {
+                material = new THREE.MeshBasicMaterial({ color: materialInfo[imgNum].color });
+            }
+            materials.push(material);
+        }
+    
+        return materials;
+    }
+    createSkybox(skybox) {
+        let textures = [];
+        const directions = ["bk", "dn", "ft", "lf", "rt", "up"];
+        for (let i = 1; i <= 6; i++) {
+            let filename = "";
+            if (skybox.mode === "name") {
+                let direction = directions[i];
+                filename = skybox.base_name + direction + "." + skybox.format;
+            }
+            else if (skybox.mode === "number") {
+                filename = skybox.base_name + i + "." + skybox.format;
+            }
+            else if (skybox.mode === "single") {
+                filename = skybox.base_name + "." + skybox.format;
+            }
+            textures.push(filename);
+        }
+        const loader = new THREE.CubeTextureLoader();
+        const texture = loader.load(textures);
+        this.scene.background = texture;
+    }
+    update() {
+    }
+}

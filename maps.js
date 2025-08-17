@@ -1,4 +1,4 @@
-const first_world = {
+export const first_world = {
     boxes: [
         {   // floor
             pos: { x: 0, y: -1, z: 0 },
@@ -43,7 +43,7 @@ const first_world = {
     ]
 }
 
-const map1 = {
+export const map1 = {
     boxes: [
         {   // floor
             pos: { x: 0, y: -1, z: 0 },
@@ -106,9 +106,9 @@ const map1 = {
 }
 
 
-const map2 = {
+export const map2 = {
     skybox: {
-        base_name: "skybox/grid",
+        base_name: "textures/skybox/grid",
         format: "png",
         mode: "single"
     },

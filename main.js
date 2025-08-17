@@ -1,6 +1,11 @@
+import { World } from './engine/World.js';
+import { Controller } from './engine/Controller.js';
+import { Player } from './engine/Player.js';
+import { map2 } from './maps.js';
+import { pauseGame } from './engine/utils.js';
+
 const scene = new THREE.Scene();
 const mainCamera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-const textureLoader = new THREE.TextureLoader();
 
 let currentCamera = mainCamera;
 
@@ -15,9 +20,10 @@ document.body.appendChild(renderer.domElement);
 
 mainCamera.position.set(1, 8, 1);
 
-world = new World();
-controller = new Controller();
-player = new Player(controller, person="firstperson");
+let world = new World(scene);
+let controller = new Controller();
+let player = new Player(controller, "firstperson", world);
+scene.add(player.object);
 
 world.createScene(map2);
 
@@ -31,12 +37,23 @@ function update() {
         world.update();
         player.update();
     }
+    if (player.person === "firstperson") {
+        currentCamera = player.camera;
+        currentCamera.rotation.x = player.dir.x;
+    }
+    else {
+        currentCamera = mainCamera;
+        currentCamera.lookAt(player.object.position);
+    }
 }
 
 update();
 
 document.addEventListener('keydown', (event) => {
     controller.keyStates[event.key.toLowerCase()] = true;
+    if (event.key.toLowerCase() === 'p') {
+        pauseGame();
+    }
 });
 
 document.addEventListener('keyup', (event) => {
