@@ -1,9 +1,10 @@
 export class Controller {
-    constructor() {
+    constructor(camera) {
         this.keyStates = {};
         this.mousePos = { x: 0, y: 0 };
         this.lastPos = { x: 0, y: 0 };
         this.mouseSpeed = { x: 0, y: 0 };
+        this.camera = camera; // TODO: Remove this from here
 
         this.mouseMoveHandler = this.mouseMoveHandler.bind(this);
         this.mouseStopHandler = this.mouseStopHandler.bind(this);
@@ -11,6 +12,40 @@ export class Controller {
 
         this.mouseStopTimeout = null;
         this.stopDelay = 100;
+
+        this.setupListeners();
+    }
+
+    setupListeners() {
+        document.addEventListener('keydown', (event) => {
+            this.keyStates[event.key.toLowerCase()] = true;
+            if (event.key.toLowerCase() === 'p') {
+                game.togglePause();
+            }
+        });
+        document.addEventListener('keyup', (event) => {
+            this.keyStates[event.key.toLowerCase()] = false;
+        });
+        document.addEventListener('mousemove', (event) => {
+            this.mousePos.x = event.clientX;
+            this.mousePos.y = event.clientY;
+        });
+        document.addEventListener('mousewheel', (event) => {
+            this.camera.fov += event.deltaY * 0.05;
+            this.camera.updateProjectionMatrix();
+        });
+        function requestPointerLock() {
+            const element = document.body;
+            if (element.requestPointerLock) {
+                element.requestPointerLock();
+            } else if (element.mozRequestPointerLock) {
+                element.mozRequestPointerLock();
+            } else if (element.webkitRequestPointerLock) {
+                element.webkitRequestPointerLock();
+            }
+        }
+
+        document.body.addEventListener('click', requestPointerLock);
     }
 
     mouseMoveHandler(event) {

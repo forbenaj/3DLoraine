@@ -8,13 +8,4 @@ export let rotationMap = {
 
 }
 
-
-export function pauseGame() {
-    if (paused) {
-        paused = false;
-    } else {
-        paused = true;
-    }
-}
-
 export const textureLoader = new THREE.TextureLoader();

@@ -1,4 +1,5 @@
 import { directionMap, rotationMap } from './utils.js';
+import { createBox, createMaterial, createSkybox } from './Factory.js';
 
 export class Player {
     constructor(controller, person = "firstperson", world) {
@@ -34,7 +35,7 @@ export class Player {
             type: "solid",
             color: 0xff0000
         }]
-        let [group, model] = this.world.createBox(pos, size, materialInfo);
+        let [group, model] = createBox(pos, size, materialInfo);
         model.position.set(0, size.y / 2, 0);
         this.object.add(model);
         return model;
