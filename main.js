@@ -2,7 +2,15 @@ import { Game } from './engine/Game.js';
 import { World } from './engine/World.js';
 import { Controller } from './engine/Controller.js';
 import { Player } from './engine/Player.js';
-import { map2 } from './maps.js';
+//import { map2 } from './maps.js';
+
+async function loadData(filename) {
+    const response = await fetch(`./assets/${filename}`);
+    const data = await response.json();
+    return data;
+}
+
+let map2 = await loadData('maps/map2.json'); // This may not work in github pages. Test, and if it doesn't, use a .js file
 
 // TODO: Obscure THRRE.js
 
