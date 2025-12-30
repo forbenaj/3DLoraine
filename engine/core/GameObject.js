@@ -1,11 +1,12 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.150.0/build/three.module.js';
 
 export class GameObject {
-    constructor(name = "GameObject") {
+    constructor(name = "GameObject", world = null) {
         this.object3D = new THREE.Object3D();
         this.name = name;
         this.components = [];
         this.children = [];
+        this.world = world;
     }
 
     get pos() { return this.object3D.position;}
@@ -18,16 +19,16 @@ export class GameObject {
         this.object3D.position.set(value.x, value.y, value.z);
     }
 
-    get rot() { return this.object3D.rotation; }
-    set rot(value) {
-        if (!value) return;
-        if (value.isEuler) {
-            this.object3D.rotation.copy(value);
-            return;
-        }
-        const order = value.order ?? this.object3D.rotation.order;
-        this.object3D.rotation.set(value.x, value.y, value.z, order);
-    }
+    // get rot() { return this.object3D.rotation; } // FIX EULER ROTATION. Previous rotation with simple Vector3 worked correctly.
+    // set rot(value) {
+    //     if (!value) return;
+    //     if (value.isEuler) {
+    //         this.object3D.rotation.copy(value);
+    //         return;
+    //     }
+    //     const order = value.order ?? this.object3D.rotation.order;
+    //     this.object3D.rotation.set(value.x, value.y, value.z, order);
+    // }
 
     get quat() { return this.object3D.quaternion; }
     set quat(value) {

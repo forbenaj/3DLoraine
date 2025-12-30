@@ -1,4 +1,5 @@
 import { World } from './World.js';
+import { Controller } from './Controller.js';
 
 const { TextureLoader, WebGLRenderer, PerspectiveCamera } = globalThis.THREE;
 
@@ -9,6 +10,7 @@ export class Game {
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.currentCamera = new PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000); // TODO: Initialize somewhere else
         this.world = new World();
+        this.controller = new Controller(this.currentCamera); // Is this a component? A gameobject? Something else? Do we need to pass currentCamera?
         this.paused = false;
         this.lastTime = performance.now();
         document.body.appendChild(this.renderer.domElement);

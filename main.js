@@ -1,7 +1,5 @@
 import { Game } from './engine/core/Game.js';
 import { World } from './engine/core/World.js';
-import { Controller } from './engine/core/Controller.js';
-import { Player } from './engine/prefabs/Player.js';
 import { createPlayerPrefab } from './engine/prefabs/playerPrefab.js';
 //import { map2 } from './maps.js';
 
@@ -13,7 +11,7 @@ async function loadData(filename) {
 
 let map2 = await loadData('maps/map2.json'); // This may not work in github pages. Test, and if it doesn't, use a .js file
 
-// TODO: Obscure THRRE.js
+// TODO: Obscure all instances of THREE.js when posible in the whole engine. Users mostly should not interact with THREE.js directly.
 
 
 // GAME
@@ -26,20 +24,19 @@ game.world = world;
 // GAMEOBJECTS
 
 // CAMERA
-const mainCamera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000); // TODO: Turn into a GameObject
+const mainCamera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000); // TODO: Turn into a GameObject/Component
 mainCamera.position.set(1, 8, 1);
 game.currentCamera = mainCamera;
 
-// CONTROLLER
-let controller = new Controller(game.currentCamera); // Is this a component? A gameobject? Something else?
 
 // PLAYER
-let player = new Player(controller, "firstperson", game.world); // TODO: Turn into a GameObject
+let player = createPlayerPrefab(game);
+
 
 // LIGHT
 const ambientLight = new THREE.AmbientLight(0x404040, 2); // TODO: Turn into a GameObject
 
-game.world.scene.add(player.object); // Should scene be obscured? (Gpt says: yes)
+game.world.scene.add(player.object3D); // Should scene be obscured? (Gpt says: yes)
 game.world.scene.add(ambientLight);
 game.world.createScene(map2);
 
@@ -51,11 +48,11 @@ function update() { // This whole loop should happen in Game
     player.update(); // TODO: Move somewhere else
     if (player.person === "firstperson") {
         game.currentCamera = player.camera;
-        game.currentCamera.rotation.x = player.dir.x;
+        game.currentCamera.rotation.x = player.rot.x;
     }
     else {
         game.currentCamera = mainCamera;
-        game.currentCamera.lookAt(player.object.position);
+        game.currentCamera.lookAt(player.object3D.position);
     }
     requestAnimationFrame(update);
 }
