@@ -1,4 +1,19 @@
-import { textureLoader } from './utils.js';
+import { textureLoader } from '../utils.js';
+
+let primitives = {
+    box: (size) => new THREE.BoxGeometry(size.x, size.y, size.z),
+    sphere: (size) => new THREE.SphereGeometry(size.x, 32, 32),
+    cylinder: (size) => new THREE.CylinderGeometry(size.x, size.y, size.z, 32),
+    cone: (size) => new THREE.ConeGeometry(size.x, size.y, 32),
+    plane: (size) => new THREE.PlaneGeometry(size.x, size.y),
+    torus: (size) => new THREE.TorusGeometry(size.x, size.y, 32, 32),
+    torusKnot: (size) => new THREE.TorusKnotGeometry(size.x, size.y, 32, 32),
+    text: (size) => new THREE.TextGeometry(size.x, size.y, size.z),
+    circle: (size) => new THREE.CircleGeometry(size.x, 32),
+    dodecahedron: (size) => new THREE.DodecahedronGeometry(size.x, 32),
+    octahedron: (size) => new THREE.OctahedronGeometry(size.x, 32),
+    tetrahedron: (size) => new THREE.TetrahedronGeometry(size.x, 32)
+}
 
 export function oldcreateBox(pos, size, materialInfo) {
     const geometry = new THREE.BoxGeometry(size.x, size.y, size.z);
@@ -11,37 +26,41 @@ export function oldcreateBox(pos, size, materialInfo) {
     return box;
 }
 
-export function createBox(pos, size, materialInfo) { // This is a messy creator just to add borders. Probably should add another kind of renderer instead
+export function createBox(meshInfo) { // This is a messy creator just to add borders. Probably should add another kind of renderer instead
     function createEdges(geometry) {
         const edgesGeometry = new THREE.EdgesGeometry(geometry);
         const edgesMaterial = new THREE.LineBasicMaterial({ color: 0x000000, linewidth: 5 });
         const edges = new THREE.LineSegments(edgesGeometry, edgesMaterial);
         return edges;
     }
-    const geometry = new THREE.BoxGeometry(size.x, size.y, size.z);
+    let size = meshInfo.size;
+    let materialInfo = meshInfo.materialInfo;
+    let type = meshInfo.type;
+    let geometry = primitives[type](size);
 
     let materials = createMaterial(materialInfo, size);
 
-    const box = new THREE.Mesh(geometry, materials);
+    const mesh = new THREE.Mesh(geometry, materials);
+    let pos = new THREE.Vector3(0, 0, 0);
     
-    box.position.x = pos.x + size.x/2;
-    box.position.y = pos.y + size.y/2;
-    box.position.z = pos.z + size.z/2;
+    mesh.position.x = pos.x + size.x/2;
+    mesh.position.y = pos.y + size.y/2;
+    mesh.position.z = pos.z + size.z/2;
 
     const edges1 = createEdges(geometry);
     const edges2 = createEdges(geometry.clone().translate(-0.01, 0.01, 0.01));
     const edges3 = createEdges(geometry.clone().translate(0.01, 0.01, -0.01));
     
-    edges1.position.copy(box.position);
-    edges2.position.copy(box.position);
-    edges3.position.copy(box.position);
+    edges1.position.copy(mesh.position);
+    edges2.position.copy(mesh.position);
+    edges3.position.copy(mesh.position);
     
     const group = new THREE.Group();
-    group.add(box);
+    group.add(mesh);
     group.add(edges1);
     group.add(edges2);
     group.add(edges3);
-    return [group, box];
+    return [group, mesh];
 }
 export function createMaterial(materialInfo, size) {
     let materials = [];

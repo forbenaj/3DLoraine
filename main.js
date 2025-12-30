@@ -1,7 +1,8 @@
-import { Game } from './engine/Game.js';
-import { World } from './engine/World.js';
-import { Controller } from './engine/Controller.js';
-import { Player } from './engine/Player.js';
+import { Game } from './engine/core/Game.js';
+import { World } from './engine/core/World.js';
+import { Controller } from './engine/core/Controller.js';
+import { Player } from './engine/prefabs/Player.js';
+import { createPlayerPrefab } from './engine/prefabs/playerPrefab.js';
 //import { map2 } from './maps.js';
 
 async function loadData(filename) {
@@ -14,34 +15,39 @@ let map2 = await loadData('maps/map2.json'); // This may not work in github page
 
 // TODO: Obscure THRRE.js
 
-// CAMERA
-const mainCamera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000); // TODO: Turn into a GameObject
-let currentCamera = mainCamera;
-mainCamera.position.set(1, 8, 1);
 
 // GAME
 let game = new Game();
-game.currentCamera = mainCamera;
 
 // WORLD
 let world = new World();
 game.world = world;
 
-// CONTROLLER
-let controller = new Controller(game.currentCamera);
+// GAMEOBJECTS
 
-const ambientLight = new THREE.AmbientLight(0x404040, 2); // TODO: Turn into a GameObject
+// CAMERA
+const mainCamera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000); // TODO: Turn into a GameObject
+mainCamera.position.set(1, 8, 1);
+game.currentCamera = mainCamera;
+
+// CONTROLLER
+let controller = new Controller(game.currentCamera); // Is this a component? A gameobject? Something else?
 
 // PLAYER
 let player = new Player(controller, "firstperson", game.world); // TODO: Turn into a GameObject
+
+// LIGHT
+const ambientLight = new THREE.AmbientLight(0x404040, 2); // TODO: Turn into a GameObject
 
 game.world.scene.add(player.object); // Should scene be obscured? (Gpt says: yes)
 game.world.scene.add(ambientLight);
 game.world.createScene(map2);
 
+
 // UPDATE
-function update() {
+function update() { // This whole loop should happen in Game
     game.update();
+    game.render();
     player.update(); // TODO: Move somewhere else
     if (player.person === "firstperson") {
         game.currentCamera = player.camera;

@@ -1,12 +1,15 @@
-import { directionMap, rotationMap } from './utils.js';
-import { createBox, createMaterial, createSkybox } from './Factory.js';
+import { directionMap, rotationMap } from '../utils.js';
+import { createBox, createMaterial, createSkybox } from '../core/Factory.js';
+import { createCameraPrefab } from './cameraPrefab.js';
 
 export class Player {
     constructor(controller, person = "firstperson", world) {
+        this.components = [];
+        this.children = [];
         this.pos = new THREE.Vector3(5, 2, 5);
         this.vel = new THREE.Vector3(0, 0, 0);
         //this.dir = new THREE.Vector3(0, -2.3, 0);
-        this.dir = new THREE.Vector3(0, 0, 0);
+        this.dir = new THREE.Vector3(0, 0, 0); // Change for rot
         this.moveSpeed = 0.2;
         this.rotationSpeed = 0.05;
         this.jumpSpeed = 0.15;
@@ -14,29 +17,70 @@ export class Player {
         this.running = false;
         this.onGround = false;
         this.height = 2.5;
-        this.object = new THREE.Object3D();
-        this.object.position.set(0, 0, 0);
         this.controller = controller;
         this.person = person
-        this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        this.object.add(this.camera);
-        this.camera.position.set(0, this.height, 0);
         this.raycaster = new THREE.Raycaster();
         this.world = world;
         //this.rayLine = this.createRayVisualization();
         //scene.add(this.rayLine);
 
+
+        // Create model
         this.createModel()
+        this.cameraPrefab = createCameraPrefab();
+        this.camera = this.cameraPrefab.components[0].camera;
+        this.object.add(this.camera);
+        this.camera.position.set(0, this.height, 0);
+
     }
+
+    // These methods mirror GameObject, until we officially move all the logic to playerPrefab
+
+    addComponent(component) {
+        this.components.push(component);
+        component.init(this);
+        return component;
+    }
+
+    removeComponent(component) {
+        this.components.splice(this.components.indexOf(component), 1);
+    }
+
+    getComponent(name) {
+        for (const component of this.components) {
+            if (component.name === name) return component;
+        }
+    }
+
+    add(child) {
+        this.children.push(child);
+        //this.object3D.add(child.object3D);
+    }
+
+    update(delta) {
+        for (const component of this.components) {
+            component.update?.(delta); // TODO: Check if it's enabled
+        }
+        for (const child of this.children) {
+            child.update?.(delta); // TODO: Check if it's enabled
+        }
+    }
+
+    // End of the mirrored methods
+
     createModel() {
-        let pos = new THREE.Vector3(0, 0, 0);
-        let size = new THREE.Vector3(1, 2.5, 1);
-        let materialInfo = [{
-            type: "solid",
-            color: 0xff0000
-        }]
-        let [group, model] = createBox(pos, size, materialInfo);
-        model.position.set(0, size.y / 2, 0);
+        this.object = new THREE.Object3D();
+        this.object.position.set(0, 0, 0);
+        let meshInfo = {
+            type: "box",
+            size: { x: 1, y: 2.5, z: 1 },
+            materialInfo: [{
+                type: "solid",
+                color: 0xff0000
+            }]
+        }
+        let [group, model] = createBox(meshInfo);
+        model.position.set(0, meshInfo.size.y / 2, 0);
         this.object.add(model);
         return model;
     }
