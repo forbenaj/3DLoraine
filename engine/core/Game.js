@@ -12,23 +12,41 @@ export class Game {
         this.world = new World();
         this.controller = new Controller(this.currentCamera); // Is this a component? A gameobject? Something else? Do we need to pass currentCamera?
         this.paused = false;
-        this.lastTime = performance.now();
+        this.running = false;
+        this._rafId = null;
+        this._lastTimeMs = 0;
+        this._tick = this._tick.bind(this);
         document.body.appendChild(this.renderer.domElement);
-        //this.animate = this.animate.bind(this);
-        //requestAnimationFrame(this.animate);
     }
-    animate(now) {
-        requestAnimationFrame(this.animate);
-        const delta = now - this.lastTime / 1000;
-        this.lastTime = now;
 
-        this.update(delta);
-        this.render();
+    start() {
+        if (this.running) return;
+        this.running = true;
+        this._lastTimeMs = performance.now();
+        this._rafId = requestAnimationFrame(this._tick);
     }
-    update(delta) {
-        if (!this.paused) {
-            this.world.update(delta);
-        }
+
+    stop() {
+        if (!this.running) return;
+        this.running = false;
+        if (this._rafId !== null) cancelAnimationFrame(this._rafId);
+        this._rafId = null;
+    }
+
+    _tick(nowMs) {
+        if (!this.running) return;
+
+        const deltaSec = Math.min((nowMs - this._lastTimeMs) * 0.001, 0.1);
+        this._lastTimeMs = nowMs;
+
+        if (!this.paused) this.update(deltaSec);
+        this.render();
+
+        this._rafId = requestAnimationFrame(this._tick);
+    }
+
+    update(deltaSec) {
+        this.world.update(deltaSec);
     }
     render() {
         this.renderer.render(this.world.scene, this.currentCamera);

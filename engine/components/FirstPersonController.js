@@ -147,6 +147,7 @@ export class FirstPersonController extends Component {
 
 
         this.mouseControl();
+        this.gameObject.rot.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, this.gameObject.rot.x));
 
         const newHeight = this.checkVerticalCollisions();
         
@@ -165,6 +166,7 @@ export class FirstPersonController extends Component {
         this.gameObject.object3D.position.y = this.gameObject.pos.y;
         this.gameObject.object3D.position.z = this.gameObject.pos.z;
         this.gameObject.object3D.rotation.y = this.gameObject.rot.y;
+        if (this.gameObject.camera) this.gameObject.camera.rotation.x = this.gameObject.rot.x;
 
 
 

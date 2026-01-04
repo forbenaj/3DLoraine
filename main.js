@@ -36,28 +36,14 @@ let player = createPlayerPrefab(game);
 // LIGHT
 const ambientLight = new THREE.AmbientLight(0x404040, 2); // TODO: Turn into a GameObject
 
-game.world.scene.add(player.object3D); // Should scene be obscured? (Gpt says: yes)
+game.world.addEntity(player);
 game.world.scene.add(ambientLight);
-game.world.createScene(map2);
+game.world.createScene(map2); // Maybe this should happen in the Game class?
 
 
 // UPDATE
-function update() { // This whole loop should happen in Game
-    game.update();
-    game.render();
-    player.update(); // TODO: Move somewhere else
-    if (player.person === "firstperson") {
-        game.currentCamera = player.camera;
-        game.currentCamera.rotation.x = player.rot.x;
-    }
-    else {
-        game.currentCamera = mainCamera;
-        game.currentCamera.lookAt(player.object3D.position);
-    }
-    requestAnimationFrame(update);
-}
-
-update();
+game.currentCamera = player.camera;
+game.start();
 
 
 // window.addEventListener('beforeunload', function (e) {
