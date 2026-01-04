@@ -20,12 +20,11 @@ function createModel() {
 }
 
 export function createPlayerPrefab(game) {
-    let controller = new Controller(game.currentCamera); // Is this a component? A gameobject? Something else?
-
-    // Do we need to pass controller? game world? Can't we just pass game?
-    let playerPrefab = new GameObject("Player", game.world); //new GameObject("player");
-    playerPrefab.controller = controller;
-    playerPrefab.person = "firstperson";
+    let thisController = new Controller(game.currentCamera); // Is this a component? A gameobject? Something else?
+    // Do we need to pass game? world?
+    let thisPlayer = new GameObject("Player", game.world); //new GameObject("player");
+    thisPlayer.controller = thisController;
+    thisPlayer.person = "firstperson";
 
     let meshInfo = {
         type: "box",
@@ -36,20 +35,21 @@ export function createPlayerPrefab(game) {
         }]
     }
 
-    let meshRenderer = playerPrefab.addComponent(new MeshRenderer(meshInfo));
-    meshRenderer.mesh.position.set(0, meshInfo.size.y / 2, 0);
-    playerPrefab.object3D.add(meshRenderer.mesh);
+    let thisMeshRenderer = thisPlayer.addComponent(new MeshRenderer(meshInfo));
+    thisMeshRenderer.mesh.position.set(0, meshInfo.size.y / 2, 0);
+    thisPlayer.object3D.add(thisMeshRenderer.mesh);
     
-    let cameraPrefab = createCameraPrefab();
-    playerPrefab.camera = cameraPrefab.components[0].camera;
-    playerPrefab.object3D.add(playerPrefab.camera);
+    let thisCamera = createCameraPrefab();
+    thisPlayer.camera = thisCamera.components[0].camera;
+    thisPlayer.object3D.add(thisPlayer.camera);
 
-    let firstPersonController = playerPrefab.addComponent(new FirstPersonController());
-    playerPrefab.camera.position.set(0, firstPersonController.height, 0);
-    playerPrefab.pos = new THREE.Vector3(5, 2, 5);
-    playerPrefab.vel = new THREE.Vector3(0, 0, 0);
-    playerPrefab.rot = new THREE.Vector3(0, 0, 0);
-    return playerPrefab;
+    let firstPersonController = thisPlayer.addComponent(new FirstPersonController());
+    thisPlayer.camera.position.set(0, firstPersonController.height, 0);
+    thisPlayer.pos = new THREE.Vector3(5, 2, 5);
+    thisPlayer.vel = new THREE.Vector3(0, 0, 0);
+    thisPlayer.rot = new THREE.Vector3(0, 0, 0);
+    return thisPlayer;
 }
+
 
 
