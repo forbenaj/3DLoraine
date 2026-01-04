@@ -57,10 +57,11 @@ export class FirstPersonController extends Component {
         ];
         const origin = this.gameObject.pos.clone();
         const collisionDistance = 1;
+        const raycastTargets = this.world.getRaycastTargets?.() ?? this.world.colliders ?? [];
         
         for (let direction of directions) {
             this.raycaster.set(origin, direction);
-            const intersections = this.raycaster.intersectObjects(this.world.objects);
+            const intersections = this.raycaster.intersectObjects(raycastTargets);
             if (intersections.length > 0 && intersections[0].distance <= collisionDistance ) {
                 const newHeight = intersections[0].point.y;
                 return newHeight;
@@ -74,10 +75,11 @@ export class FirstPersonController extends Component {
         ];
         const origin = this.gameObject.pos.clone();
         const collisionDistance = 1;
+        const raycastTargets = this.world.getRaycastTargets?.() ?? this.world.colliders ?? [];
         
         for (let direction of directions) {
             this.raycaster.set(origin, direction);
-            const intersections = this.raycaster.intersectObjects(this.world.objects);
+            const intersections = this.raycaster.intersectObjects(raycastTargets);
             if (intersections.length > 0 && intersections[0].distance < collisionDistance) {
                 const slideVector = this.handleHorizontalCollision(intersections[0], direction);
                 return {

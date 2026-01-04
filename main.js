@@ -36,7 +36,7 @@ let player = createPlayerPrefab(game);
 // LIGHT
 const ambientLight = new THREE.AmbientLight(0x404040, 2); // TODO: Turn into a GameObject
 
-game.world.addEntity(player);
+game.world.add(player, { updatable: true, collider: false });
 game.world.scene.add(ambientLight);
 game.world.createScene(map2); // Maybe this should happen in the Game class?
 

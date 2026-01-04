@@ -3,7 +3,6 @@ import { MeshRenderer } from '../components/MeshRenderer.js';
 import { FirstPersonController } from '../components/FirstPersonController.js';
 import { createCameraPrefab } from './cameraPrefab.js';
 import { createBox } from '../core/oldFactory.js';
-import { Player } from './Player.js';
 import { Controller } from '../core/Controller.js';
 
 
